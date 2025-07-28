@@ -65,6 +65,7 @@ void wifi_init_softap(void)
             .ssid_len = strlen(EXAMPLE_ESP_WIFI_SSID),
             .channel = EXAMPLE_ESP_WIFI_CHANNEL,
             .password = EXAMPLE_ESP_WIFI_PASS,
+            // .ssid_hidden = 1, // 1 表示隐藏 SSID
             .max_connection = EXAMPLE_MAX_STA_CONN,
 #ifdef CONFIG_ESP_WIFI_SOFTAP_SAE_SUPPORT
             .authmode = WIFI_AUTH_WPA3_PSK,
@@ -80,6 +81,22 @@ void wifi_init_softap(void)
     if (strlen(EXAMPLE_ESP_WIFI_PASS) == 0) {
         wifi_config.ap.authmode = WIFI_AUTH_OPEN;
     }
+    esp_wifi_set_bandwidth(WIFI_IF_AP, WIFI_BW_HT40);//AP工作在40MHz带宽下
+
+    wifi_country_t config = {
+        .cc = "CN",//中国
+        .schan = 1,
+        .nchan = 13,
+        .policy = WIFI_COUNTRY_POLICY_AUTO,
+    };
+    //  日本的频带
+    // wifi_country_t config = {
+    //     .cc = "JP",
+    //     .schan = 1,
+    //     .nchan = 14,
+    //     .policy = WIFI_COUNTRY_POLICY_AUTO,
+    // };
+    esp_wifi_set_country(&config);//设置国家
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
