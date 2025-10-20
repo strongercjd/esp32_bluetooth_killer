@@ -18,15 +18,23 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
+#include "driver/gpio.h"
+
 /* The examples use WiFi configuration that you can set via project configuration menu.
 
    If you'd rather not, just change the below entries to strings with
    the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
 */
-#define EXAMPLE_ESP_WIFI_SSID      CONFIG_ESP_WIFI_SSID
-#define EXAMPLE_ESP_WIFI_PASS      CONFIG_ESP_WIFI_PASSWORD
+#define EXAMPLE_ESP_WIFI_SSID      "myssid1111111111111111111111"
+#define EXAMPLE_ESP_WIFI_PASS      "123456890"
 #define EXAMPLE_ESP_WIFI_CHANNEL   CONFIG_ESP_WIFI_CHANNEL
 #define EXAMPLE_MAX_STA_CONN       CONFIG_ESP_MAX_STA_CONN
+
+#if CONFIG_ESP_GTK_REKEYING_ENABLE
+#define EXAMPLE_GTK_REKEY_INTERVAL CONFIG_ESP_GTK_REKEY_INTERVAL
+#else
+#define EXAMPLE_GTK_REKEY_INTERVAL 0
+#endif
 
 static const char *TAG = "wifi softAP";
 
@@ -76,11 +84,19 @@ void wifi_init_softap(void)
             .pmf_cfg = {
                     .required = true,
             },
+#ifdef CONFIG_ESP_WIFI_BSS_MAX_IDLE_SUPPORT
+            .bss_max_idle_cfg = {
+                .period = WIFI_AP_DEFAULT_MAX_IDLE_PERIOD,
+                .protected_keep_alive = 1,
+            },
+#endif
+            .gtk_rekey_interval = EXAMPLE_GTK_REKEY_INTERVAL,
         },
     };
     if (strlen(EXAMPLE_ESP_WIFI_PASS) == 0) {
         wifi_config.ap.authmode = WIFI_AUTH_OPEN;
     }
+
     esp_wifi_set_bandwidth(WIFI_IF_AP, WIFI_BW_HT40);//AP工作在40MHz带宽下
 
     wifi_country_t config = {
@@ -102,8 +118,25 @@ void wifi_init_softap(void)
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
 
-    ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
-             EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS, EXAMPLE_ESP_WIFI_CHANNEL);
+    //设置GPIO18为输出模式，并输出低电平
+    gpio_config_t io_conf = {};
+    io_conf.intr_type = GPIO_INTR_DISABLE;
+    io_conf.mode = GPIO_MODE_OUTPUT;
+    io_conf.pin_bit_mask = 1ULL << GPIO_NUM_18;;
+    io_conf.pull_down_en = 0;
+    io_conf.pull_up_en = 0;
+    gpio_config(&io_conf);
+
+    gpio_set_level(GPIO_NUM_18, 0);
+    
+    ESP_LOGI(TAG, "GPIO18 set to output and low level");
+
+    while(1)
+    {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
+                EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS, EXAMPLE_ESP_WIFI_CHANNEL);
+    }
 }
 
 void app_main(void)

@@ -1,11 +1,19 @@
 {
-  "C_Cpp.intelliSenseEngine": "default",
-  "idf.espIdfPathWin": "d:\\ESP-IDF\\v5.4.1\\esp-idf",
-  "idf.toolsPathWin": "d:\\ESP-IDFTools",
-  "idf.pythonInstallPath": "d:\\ESP-IDFTools\\tools\\idf-python\\3.11.2\\python.exe",
+  "idf.espIdfPathWin": "D:/Espressif/frameworks/esp-idf-v5.5.1/",
+  "idf.toolsPathWin": "D:\\Espressif",
+  "idf.pythonInstallPath": "D:\\Espressif\\tools\\idf-python\\3.11.2\\python.exe",
   "idf.flashType": "UART",
+  "idf.portWin": "COM9",
+  "idf.openOcdConfigs": [
+    "board/esp32c2-bridge.cfg"
+  ],
   "idf.customExtraVars": {
-    "IDF_TARGET": "esp32s3"
+    "IDF_TARGET": "esp32c2"
   },
-  "idf.portWin": "COM3"
+  "clangd.path": "D:\\Espressif\\tools\\esp-clang\\esp-19.1.2_20250312\\esp-clang\\bin\\clangd.exe",
+  "clangd.arguments": [
+    "--background-index",
+    "--query-driver=D:\\Espressif\\tools\\riscv32-esp-elf\\esp-14.2.0_20241119\\riscv32-esp-elf\\bin\\riscv32-esp-elf-gcc.exe",
+    "--compile-commands-dir=d:\\code\\softAP\\build"
+  ]
 }
